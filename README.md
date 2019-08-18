@@ -40,11 +40,11 @@ Options:
 
 
 ```
-$ ghtopdep https://github.com/dropbox/dropbox-sdk-js     
+➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js
 +-------------------------------------------+---------+
 | URL                                       |   Stars |
 +===========================================+=========+
-| https://github.com/LN-Zap/zap-desktop     |     978 |
+| https://github.com/LN-Zap/zap-desktop     |     979 |
 +-------------------------------------------+---------+
 | https://github.com/Cleod9/syncmarx-webext |      35 |
 +-------------------------------------------+---------+
@@ -64,8 +64,9 @@ $ ghtopdep https://github.com/dropbox/dropbox-sdk-js
 +-------------------------------------------+---------+
 | https://github.com/Kikugumo/imas765probot |       5 |
 +-------------------------------------------+---------+
-found 1203 repos others is private
-found 289 repos with more than zero star
+found 1173 repos others repos is private
+found 281 repos with more than zero star
+~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.5.7 took 36s 
 ```
 
 
