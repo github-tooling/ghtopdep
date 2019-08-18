@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ghtopdep"
+version = "0.1.0"
+description = "CLI tool for sorting dependents repo by stars"
+authors = ["Andriy Orehov <andriyorehov@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/github-tooling/forkwork"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+httpx = "^0.6.8"
+selectolax = "^0.1.13"
+tabulate = "^0.8.3"
+click = "^7.0"
+halo = "^0.0.26"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+ghtopdep = 'ghtopdep.ghtopdep:cli'
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
