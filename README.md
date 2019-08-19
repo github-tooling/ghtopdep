@@ -26,6 +26,11 @@ $ cd ghtopdep
 $ python setup.py install
 ```
 
+## Version upgrade
+```
+➜ pip install --upgrade ghtopdep   
+```
+
 ## Usage
 
 ```
