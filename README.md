@@ -29,13 +29,15 @@ $ python setup.py install
 ## Usage
 
 ```
-$ ghtopdep --help
+➜ ghtopdep --help                                              
 Usage: ghtopdep [OPTIONS] URL
 
 Options:
-  --show INTEGER       Number of showing repositories (default=10).
-  --more-than INTEGER  Number of stars (default=5).
-  --help               Show this message and exit.
+  --repositories / --packages  Sort repositories or packages (default
+                               repositories)
+  --show INTEGER               Number of showing repositories (default=10)
+  --more-than INTEGER          Minimum number of stars (default=5)
+  --help                       Show this message and exit.
 ```
 
 
@@ -69,6 +71,36 @@ found 281 repos with more than zero star
 ~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.5.7 took 36s 
 ```
 
+also you can sort packages
+
+```
+➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --packages
++--------------------------------------------------------+---------+
+| URL                                                    |   Stars |
++========================================================+=========+
+| https://github.com/jsbin/jsbin                         |    3917 |
++--------------------------------------------------------+---------+
+| https://github.com/jvilk/BrowserFS                     |    1489 |
++--------------------------------------------------------+---------+
+| https://github.com/coderaiser/cloudcmd                 |    1033 |
++--------------------------------------------------------+---------+
+| https://github.com/robertknight/passcards              |     130 |
++--------------------------------------------------------+---------+
+| https://github.com/transloadit/uppy-server             |     115 |
++--------------------------------------------------------+---------+
+| https://github.com/bioimagesuiteweb/bisweb             |      31 |
++--------------------------------------------------------+---------+
+| https://github.com/sallar/dropbox-fs                   |      29 |
++--------------------------------------------------------+---------+
+| https://github.com/NickTikhonov/up                     |      13 |
++--------------------------------------------------------+---------+
+| https://github.com/soixantecircuits/altruist           |       8 |
++--------------------------------------------------------+---------+
+| https://github.com/OpenMarshal/npm-WebDAV-Server-Types |       5 |
++--------------------------------------------------------+---------+
+found 129 packages others packages is private
+found 57 packages with more than zero star
+```
 
 ## Development setup
 Using [Poetry](https://poetry.eustace.io/docs/)   
