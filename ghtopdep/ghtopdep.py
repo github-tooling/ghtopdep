@@ -55,7 +55,7 @@ def cli(url, repositories, show, more_than):
     repos = []
     more_than_zero = 0
     repo_count = 0
-    spinner = Halo(text="Fetch information about dependents repo", spinner="dots")
+    spinner = Halo(text="Fetching information about {}".format(destinations), spinner="dots")
     spinner.start()
     sess = requests.session()
     cached_sess = CacheControl(sess, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
