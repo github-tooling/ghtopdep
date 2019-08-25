@@ -1,3 +1,4 @@
+import textwrap
 from collections import namedtuple
 from operator import attrgetter
 import calendar
@@ -12,6 +13,7 @@ from cachecontrol.heuristics import BaseHeuristic
 from halo import Halo
 from selectolax.parser import HTMLParser
 from tabulate import tabulate
+import github3
 
 NEXT_BUTTON_SELECTOR = "#dependents > div.paginate-container > div > a"
 ITEM_SELECTOR = "#dependents > div.Box > div.flex-items-center"
@@ -41,9 +43,28 @@ def already_added(repo_url, repos):
 @click.command()
 @click.argument("url")
 @click.option('--repositories/--packages', default=True, help="Sort repositories or packages (default repositories)")
+@click.option('--description', is_flag=True, help="Show description of packages or repositories (performs additional request per repository)")
 @click.option("--show", default=10, help="Number of showing repositories (default=10)")
 @click.option("--more-than", default=5, help="Minimum number of stars (default=5)")
-def cli(url, repositories, show, more_than):
+@click.option("--token", envvar="GHTOPDEP_TOKEN")
+def cli(url, repositories, show, more_than, description, token):
+    if description and token:
+        gh = github3.login(token=token)
+        CacheControl(gh.session, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
+        Repo = namedtuple("Repo", ["url", "stars", "description"])
+    elif description and not token:
+        print("Please provide token")
+    else:
+        Repo = namedtuple("Repo", ["url", "stars"])
+
+    def fetch_description(relative_url):
+        _, owner, repository = relative_url.split("/")
+        repository = gh.repository(owner, repository)
+        repo_description = " "
+        if repository.description:
+            repo_description = textwrap.shorten(repository.description, width=60, placeholder="...")
+        return repo_description
+
     destination = "repository"
     destinations = "repositories"
     if not repositories:
@@ -51,7 +72,6 @@ def cli(url, repositories, show, more_than):
         destinations = "packages"
     page_url = "{}/network/dependents?dependent_type={}".format(url, destination.upper())
 
-    Repo = namedtuple("Repo", ["url", "stars"])
     repos = []
     more_than_zero = 0
     repo_count = 0
@@ -82,7 +102,11 @@ def cli(url, repositories, show, more_than):
                 # can be listed same package
                 is_already_added = already_added(repo_url, repos)
                 if not is_already_added and repo_url != url:
-                    repos.append(Repo(repo_url, repo_stars_num))
+                    if description:
+                        repo_description = fetch_description(relative_repo_url)
+                        repos.append(Repo(repo_url, repo_stars_num, repo_description))
+                    else:
+                        repos.append(Repo(repo_url, repo_stars_num))
 
         node = parsed_node.css(NEXT_BUTTON_SELECTOR)
         if len(node) == 2:
@@ -95,7 +119,10 @@ def cli(url, repositories, show, more_than):
 
     sorted_repos = sorted(repos[:show], key=attrgetter("stars"), reverse=True)
     if sorted_repos:
-        print(tabulate(sorted_repos, headers=["URL", "Stars"], tablefmt="grid"))
+        if description:
+            print(tabulate(sorted_repos, headers=["URL", "Stars", "Description"], tablefmt="grid"))
+        else:
+            print(tabulate(sorted_repos, headers=["URL", "Stars"], tablefmt="grid"))
         print("found {} {} others {} is private".format(repo_count, destinations, destinations))
         print("found {} {} with more than zero star".format(more_than_zero, destinations))
     else:
