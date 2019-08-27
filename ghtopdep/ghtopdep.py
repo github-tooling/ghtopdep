@@ -1,11 +1,12 @@
+import calendar
 import textwrap
 from collections import namedtuple
-from operator import attrgetter
-import calendar
 from datetime import datetime, timedelta
-from email.utils import parsedate, formatdate
+from email.utils import formatdate, parsedate
+from operator import attrgetter
 
 import click
+import github3
 import requests
 from cachecontrol import CacheControl
 from cachecontrol.caches import FileCache
@@ -13,7 +14,6 @@ from cachecontrol.heuristics import BaseHeuristic
 from halo import Halo
 from selectolax.parser import HTMLParser
 from tabulate import tabulate
-import github3
 
 NEXT_BUTTON_SELECTOR = "#dependents > div.paginate-container > div > a"
 ITEM_SELECTOR = "#dependents > div.Box > div.flex-items-center"
@@ -31,7 +31,7 @@ class OneDayHeuristic(BaseHeuristic):
 
     def warning(self, response):
         msg = "Automatically cached! Response is Stale."
-        return '110 - "%s"' % msg
+        return "110 - {0}".format(msg)
 
 
 def already_added(repo_url, repos):
@@ -42,8 +42,9 @@ def already_added(repo_url, repos):
 
 @click.command()
 @click.argument("url")
-@click.option('--repositories/--packages', default=True, help="Sort repositories or packages (default repositories)")
-@click.option('--description', is_flag=True, help="Show description of packages or repositories (performs additional request per repository)")
+@click.option("--repositories/--packages", default=True, help="Sort repositories or packages (default repositories)")
+@click.option("--description", is_flag=True, help="Show description of packages or repositories (performs additional "
+                                                  "request per repository)")
 @click.option("--show", default=10, help="Number of showing repositories (default=10)")
 @click.option("--more-than", default=5, help="Minimum number of stars (default=5)")
 @click.option("--token", envvar="GHTOPDEP_TOKEN")
@@ -53,7 +54,7 @@ def cli(url, repositories, show, more_than, description, token):
         CacheControl(gh.session, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
         Repo = namedtuple("Repo", ["url", "stars", "description"])
     elif description and not token:
-        print("Please provide token")
+        click.echo("Please provide token")
     else:
         Repo = namedtuple("Repo", ["url", "stars"])
 
@@ -70,25 +71,25 @@ def cli(url, repositories, show, more_than, description, token):
     if not repositories:
         destination = "package"
         destinations = "packages"
-    page_url = "{}/network/dependents?dependent_type={}".format(url, destination.upper())
+    page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
 
     repos = []
     more_than_zero = 0
     repo_count = 0
-    spinner = Halo(text="Fetching information about {}".format(destinations), spinner="dots")
+    spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots")
     spinner.start()
     sess = requests.session()
     cached_sess = CacheControl(sess, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
     while True:
-        r = cached_sess.get(page_url)
-        parsed_node = HTMLParser(r.text)
+        response = cached_sess.get(page_url)
+        parsed_node = HTMLParser(response.text)
         dependents = parsed_node.css(ITEM_SELECTOR)
         repo_count += len(dependents)
-        for i in dependents:
-            repo_stars_list = i.css(STARS_SELECTOR)
+        for dep in dependents:
+            repo_stars_list = dep.css(STARS_SELECTOR)
             # only for ghost or private? packages
             if repo_stars_list:
-                repo_stars = i.css(STARS_SELECTOR)[0].text().strip()
+                repo_stars = dep.css(STARS_SELECTOR)[0].text().strip()
                 repo_stars_num = int(repo_stars.replace(",", ""))
             else:
                 continue
@@ -96,8 +97,8 @@ def cli(url, repositories, show, more_than, description, token):
             if repo_stars_num != 0:
                 more_than_zero += 1
             if repo_stars_num >= more_than:
-                relative_repo_url = i.css(REPO_SELECTOR)[0].attributes["href"]
-                repo_url = "{}{}".format(GITHUB_URL, relative_repo_url)
+                relative_repo_url = dep.css(REPO_SELECTOR)[0].attributes["href"]
+                repo_url = "{0}{1}".format(GITHUB_URL, relative_repo_url)
 
                 # can be listed same package
                 is_already_added = already_added(repo_url, repos)
@@ -119,11 +120,8 @@ def cli(url, repositories, show, more_than, description, token):
 
     sorted_repos = sorted(repos[:show], key=attrgetter("stars"), reverse=True)
     if sorted_repos:
-        if description:
-            print(tabulate(sorted_repos, headers=["URL", "Stars", "Description"], tablefmt="grid"))
-        else:
-            print(tabulate(sorted_repos, headers=["URL", "Stars"], tablefmt="grid"))
-        print("found {} {} others {} is private".format(repo_count, destinations, destinations))
-        print("found {} {} with more than zero star".format(more_than_zero, destinations))
+        click.echo(tabulate(sorted_repos, headers="keys", tablefmt="grid"))
+        click.echo("found {0} {1} others {2} is private".format(repo_count, destinations, destinations))
+        click.echo("found {0} {1} with more than zero star".format(more_than_zero, destinations))
     else:
-        print("Doesn't find any {} that math search request".format(destination))
+        click.echo("Doesn't find any {0} that match search request".format(destination))

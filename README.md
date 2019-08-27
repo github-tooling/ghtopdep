@@ -63,7 +63,7 @@ Options:
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js
 +-------------------------------------------+---------+
-| URL                                       |   Stars |
+| url                                       |   stars |
 +===========================================+=========+
 | https://github.com/LN-Zap/zap-desktop     |     979 |
 +-------------------------------------------+---------+
@@ -95,7 +95,7 @@ also you can sort packages and fetch their description
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --description --packages
 +--------------------------------------------------------+---------+--------------------------------------------------------------+
-| URL                                                    |   Stars | Description                                                  |
+| url                                                    |   stars | description                                                  |
 +========================================================+=========+==============================================================+
 | https://github.com/jsbin/jsbin                         |    3919 | Collaborative JavaScript Debugging App                       |
 +--------------------------------------------------------+---------+--------------------------------------------------------------+
