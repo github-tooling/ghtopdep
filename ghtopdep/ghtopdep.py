@@ -40,15 +40,34 @@ def already_added(repo_url, repos):
             return True
 
 
+def fetch_description(gh, relative_url):
+    _, owner, repository = relative_url.split("/")
+    repository = gh.repository(owner, repository)
+    repo_description = " "
+    if repository.description:
+        repo_description = textwrap.shorten(repository.description, width=60, placeholder="...")
+    return repo_description
+
+
+def show_result(repos, rows, total_repos_count, more_than_zero_count, destination, destinations):
+    sorted_repos = sorted(repos[:rows], key=attrgetter("stars"), reverse=True)
+    if sorted_repos:
+        click.echo(tabulate(sorted_repos, headers="keys", tablefmt="grid"))
+        click.echo("found {0} {1} others {2} is private".format(total_repos_count, destinations, destinations))
+        click.echo("found {0} {1} with more than zero star".format(more_than_zero_count, destinations))
+    else:
+        click.echo("Doesn't find any {0} that match search request".format(destination))
+
+
 @click.command()
 @click.argument("url")
 @click.option("--repositories/--packages", default=True, help="Sort repositories or packages (default repositories)")
 @click.option("--description", is_flag=True, help="Show description of packages or repositories (performs additional "
                                                   "request per repository)")
-@click.option("--show", default=10, help="Number of showing repositories (default=10)")
-@click.option("--more-than", default=5, help="Minimum number of stars (default=5)")
+@click.option("--rows", default=10, help="Number of showing repositories (default=10)")
+@click.option("--minstar", default=5, help="Minimum number of stars (default=5)")
 @click.option("--token", envvar="GHTOPDEP_TOKEN")
-def cli(url, repositories, show, more_than, description, token):
+def cli(url, repositories, rows, minstar, description, token):
     if description and token:
         gh = github3.login(token=token)
         CacheControl(gh.session, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
@@ -58,14 +77,6 @@ def cli(url, repositories, show, more_than, description, token):
     else:
         Repo = namedtuple("Repo", ["url", "stars"])
 
-    def fetch_description(relative_url):
-        _, owner, repository = relative_url.split("/")
-        repository = gh.repository(owner, repository)
-        repo_description = " "
-        if repository.description:
-            repo_description = textwrap.shorten(repository.description, width=60, placeholder="...")
-        return repo_description
-
     destination = "repository"
     destinations = "repositories"
     if not repositories:
@@ -74,8 +85,8 @@ def cli(url, repositories, show, more_than, description, token):
     page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
 
     repos = []
-    more_than_zero = 0
-    repo_count = 0
+    more_than_zero_count = 0
+    total_repos_count = 0
     spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots")
     spinner.start()
     sess = requests.session()
@@ -84,7 +95,7 @@ def cli(url, repositories, show, more_than, description, token):
         response = cached_sess.get(page_url)
         parsed_node = HTMLParser(response.text)
         dependents = parsed_node.css(ITEM_SELECTOR)
-        repo_count += len(dependents)
+        total_repos_count += len(dependents)
         for dep in dependents:
             repo_stars_list = dep.css(STARS_SELECTOR)
             # only for ghost or private? packages
@@ -95,8 +106,8 @@ def cli(url, repositories, show, more_than, description, token):
                 continue
 
             if repo_stars_num != 0:
-                more_than_zero += 1
-            if repo_stars_num >= more_than:
+                more_than_zero_count += 1
+            if repo_stars_num >= minstar:
                 relative_repo_url = dep.css(REPO_SELECTOR)[0].attributes["href"]
                 repo_url = "{0}{1}".format(GITHUB_URL, relative_repo_url)
 
@@ -104,7 +115,7 @@ def cli(url, repositories, show, more_than, description, token):
                 is_already_added = already_added(repo_url, repos)
                 if not is_already_added and repo_url != url:
                     if description:
-                        repo_description = fetch_description(relative_repo_url)
+                        repo_description = fetch_description(gh, relative_repo_url)
                         repos.append(Repo(repo_url, repo_stars_num, repo_description))
                     else:
                         repos.append(Repo(repo_url, repo_stars_num))
@@ -118,10 +129,4 @@ def cli(url, repositories, show, more_than, description, token):
         elif node[0].text() == "Next":
             page_url = node[0].attributes["href"]
 
-    sorted_repos = sorted(repos[:show], key=attrgetter("stars"), reverse=True)
-    if sorted_repos:
-        click.echo(tabulate(sorted_repos, headers="keys", tablefmt="grid"))
-        click.echo("found {0} {1} others {2} is private".format(repo_count, destinations, destinations))
-        click.echo("found {0} {1} with more than zero star".format(more_than_zero, destinations))
-    else:
-        click.echo("Doesn't find any {0} that match search request".format(destination))
+    show_result(repos, rows, total_repos_count, more_than_zero_count, destination, destinations)
