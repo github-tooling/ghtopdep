@@ -49,11 +49,15 @@ def fetch_description(gh, relative_url):
     return repo_description
 
 
-def show_result(repos, rows, total_repos_count, more_than_zero_count, destination, destinations):
-    sorted_repos = sorted(repos[:rows], key=attrgetter("stars"), reverse=True)
-    if sorted_repos:
-        click.echo(tabulate(sorted_repos, headers="keys", tablefmt="grid"))
-        click.echo("found {0} {1} others {2} is private".format(total_repos_count, destinations, destinations))
+def sort_repos(repos, rows):
+    sorted_repos = sorted(repos, key=attrgetter("stars"), reverse=True)
+    return sorted_repos[:rows]
+
+
+def show_result(repos, total_repos_count, more_than_zero_count, destination, destinations):
+    if repos:
+        click.echo(tabulate(repos, headers="keys", tablefmt="grid"))
+        click.echo("found {0} {1} others {2} are private".format(total_repos_count, destinations, destinations))
         click.echo("found {0} {1} with more than zero star".format(more_than_zero_count, destinations))
     else:
         click.echo("Doesn't find any {0} that match search request".format(destination))
@@ -129,4 +133,5 @@ def cli(url, repositories, rows, minstar, description, token):
         elif node[0].text() == "Next":
             page_url = node[0].attributes["href"]
 
-    show_result(repos, rows, total_repos_count, more_than_zero_count, destination, destinations)
+    sorted_repos = sort_repos(repos, rows)
+    show_result(sorted_repos, total_repos_count, more_than_zero_count, destination, destinations)
