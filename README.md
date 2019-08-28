@@ -53,8 +53,8 @@ Options:
                                repositories)
   --description                Show description of packages or repositories
                                (performs additional request per repository)
-  --show INTEGER               Number of showing repositories (default=10)
-  --more-than INTEGER          Minimum number of stars (default=5)
+  --rows INTEGER               Number of showing repositories (default=10)
+  --minstar INTEGER            Minimum number of stars (default=5)
   --token TEXT
   --help                       Show this message and exit.
 ```
