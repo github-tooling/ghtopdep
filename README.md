@@ -7,6 +7,7 @@ CLI tool for sorting dependents repo by stars
 
 ## Requirements
 * Python 3.5 and up
+* Python development libraries
 
 ## Installation
 from PyPI
@@ -24,6 +25,18 @@ from source
 $ git clone https://github.com/github-tooling/ghtopdep
 $ cd ghtopdep
 $ python setup.py install
+```
+
+## Python development Installation
+
+Ubuntu/Debian
+```
+sudo apt install python3-dev
+```
+
+CentOS/RHEL
+```
+sudo yum install python3-dev
 ```
 
 ## Version upgrade
