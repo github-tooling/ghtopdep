@@ -36,12 +36,12 @@ sudo apt install python3-dev
 
 CentOS/RHEL
 ```
-sudo yum install python3-dev
+sudo yum install python3-devel
 ```
 
 ## Version upgrade
 ```
-➜ pip install --upgrade ghtopdep   
+➜ pip install --upgrade ghtopdep
 ```
 
 ## Usage
