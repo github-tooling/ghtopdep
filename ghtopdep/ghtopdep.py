@@ -1,6 +1,8 @@
 import calendar
 import json
+import sys
 import textwrap
+from urllib.parse import urlparse
 from collections import namedtuple
 from datetime import datetime, timedelta
 from email.utils import formatdate, parsedate
@@ -75,14 +77,18 @@ def show_result(repos, total_repos_count, more_than_zero_count, destination, des
                                                   "request per repository)")
 @click.option("--rows", default=10, help="Number of showing repositories (default=10)")
 @click.option("--minstar", default=5, help="Minimum number of stars (default=5)")
+@click.option("--search", help="search code at dependents (repositories/packages)")
 @click.option("--token", envvar="GHTOPDEP_TOKEN")
-def cli(url, repositories, table, rows, minstar, description, token):
-    if description and token:
+def cli(url, repositories, search, table, rows, minstar, description, token):
+    if (description or search) and token:
         gh = github3.login(token=token)
         CacheControl(gh.session, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
-        Repo = namedtuple("Repo", ["url", "stars", "description"])
-    elif description and not token:
+    elif (description or search) and not token:
         click.echo("Please provide token")
+        sys.exit()
+
+    if description:
+        Repo = namedtuple("Repo", ["url", "stars", "description"])
     else:
         Repo = namedtuple("Repo", ["url", "stars"])
 
@@ -139,4 +145,11 @@ def cli(url, repositories, table, rows, minstar, description, token):
             page_url = node[0].attributes["href"]
 
     sorted_repos = sort_repos(repos, rows)
-    show_result(sorted_repos, total_repos_count, more_than_zero_count, destination, destinations, table)
+
+    if search:
+        for repo in repos:
+            repo_path = urlparse(repo.url).path[1:]
+            for s in gh.search_code("{0} repo:{1}".format(search, repo_path)):
+                click.echo("{0} with {1} stars".format(s.html_url, repo.stars))
+    else:
+        show_result(sorted_repos, total_repos_count, more_than_zero_count, destination, destinations, table)

@@ -56,6 +56,8 @@ Options:
                                (performs additional request per repository)
   --rows INTEGER               Number of showing repositories (default=10)
   --minstar INTEGER            Minimum number of stars (default=5)
+  --search TEXT                search code at dependents
+                               (repositories/packages)
   --token TEXT
   --help                       Show this message and exit.
 ```
@@ -97,7 +99,7 @@ JSON view
 [{"url": "https://github.com/transloadit/uppy", "stars": 21191}, {"url": "https://github.com/codesandbox/codesandbox-client", "stars": 8386}, {"url": "https://github.com/joemccann/dillinger", "stars": 6491}, {"url": "https://github.com/keplergl/kepler.gl", "stars": 5615}, {"url": "https://github.com/jitsi/jitsi-meet", "stars": 4303}, {"url": "https://github.com/jsbin/jsbin", "stars": 3947}, {"url": "https://github.com/NorthwoodsSoftware/GoJS", "stars": 3692}, {"url": "https://github.com/buttercup/buttercup-desktop", "stars": 3054}, {"url": "https://github.com/openstyles/stylus", "stars": 2219}, {"url": "https://github.com/mickael-kerjean/filestash", "stars": 1869}]
 ```
 
-also you can sort packages and fetch their description 
+you can sort packages and fetch their description 
 
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --description --packages
@@ -127,6 +129,20 @@ also you can sort packages and fetch their description
 found 130 packages others packages are private
 found 57 packages with more than zero star
 ```
+
+also ghtopdep support code searching at dependents (repositories/packages)
+
+```
+➜ ghtopdep https://github.com/rob-balfre/svelte-select --search=isMulti --minstar=0
+https://github.com/andriyor/linkorg-frontend/blob/7eed49c332f127c8541281b85def80e54c882920/src/App.svelte with 0 stars
+https://github.com/andriyor/linkorg-frontend/blob/7eed49c332f127c8541281b85def80e54c882920/src/providers/Post.svelte with 0 stars
+https://github.com/jdgaravito/bitagora_frontend/blob/776a23f5e848995d3eba90563d55c96429470c48/src/Events/AddEvent.svelte with 0 stars
+https://github.com/gopear/OlcsoSor/blob/b1fa1d877a59f7daf41a86fecb21137c91652d77/src/routes/index.svelte with 3 stars
+https://github.com/openstate/allmanak/blob/ff9ac0833e5e63f7c17f99c5c2355b4e46c48148/app/src/routes/index.svelte with 3 stars
+https://github.com/openstate/allmanak/blob/e6d7aa72a8878eefc6f63a27c983894de1cef294/app/src/components/ReportForm.svelte with 3 stars
+https://github.com/wolbodo/members/blob/d091f1e44b4e8cb8cc31f39ea6f6e9c36211d019/sapper/src/components/Member.html with 1 stars
+```
+
 
 ## Development setup
 Using [Poetry](https://poetry.eustace.io/docs/)   
