@@ -51,6 +51,7 @@ Usage: ghtopdep [OPTIONS] URL
 Options:
   --repositories / --packages  Sort repositories or packages (default
                                repositories)
+  --table / --json             View mode
   --description                Show description of packages or repositories
                                (performs additional request per repository)
   --rows INTEGER               Number of showing repositories (default=10)
@@ -59,7 +60,7 @@ Options:
   --help                       Show this message and exit.
 ```
 
-
+Table view (by default)
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js
 +---------------------------------------------------+---------+
@@ -88,6 +89,12 @@ Options:
 found 1583 repositories others repositories is private
 found 419 repositories with more than zero star
 ~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.5.7 took 36s 
+```
+
+JSON view
+```
+➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --json         
+[{"url": "https://github.com/transloadit/uppy", "stars": 21191}, {"url": "https://github.com/codesandbox/codesandbox-client", "stars": 8386}, {"url": "https://github.com/joemccann/dillinger", "stars": 6491}, {"url": "https://github.com/keplergl/kepler.gl", "stars": 5615}, {"url": "https://github.com/jitsi/jitsi-meet", "stars": 4303}, {"url": "https://github.com/jsbin/jsbin", "stars": 3947}, {"url": "https://github.com/NorthwoodsSoftware/GoJS", "stars": 3692}, {"url": "https://github.com/buttercup/buttercup-desktop", "stars": 3054}, {"url": "https://github.com/openstyles/stylus", "stars": 2219}, {"url": "https://github.com/mickael-kerjean/filestash", "stars": 1869}]
 ```
 
 also you can sort packages and fetch their description 

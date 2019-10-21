@@ -1,4 +1,5 @@
 import calendar
+import json
 import textwrap
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -54,24 +55,28 @@ def sort_repos(repos, rows):
     return sorted_repos[:rows]
 
 
-def show_result(repos, total_repos_count, more_than_zero_count, destination, destinations):
-    if repos:
-        click.echo(tabulate(repos, headers="keys", tablefmt="grid"))
-        click.echo("found {0} {1} others {2} are private".format(total_repos_count, destinations, destinations))
-        click.echo("found {0} {1} with more than zero star".format(more_than_zero_count, destinations))
+def show_result(repos, total_repos_count, more_than_zero_count, destination, destinations, table):
+    if table:
+        if repos:
+            click.echo(tabulate(repos, headers="keys", tablefmt="grid"))
+            click.echo("found {0} {1} others {2} are private".format(total_repos_count, destinations, destinations))
+            click.echo("found {0} {1} with more than zero star".format(more_than_zero_count, destinations))
+        else:
+            click.echo("Doesn't find any {0} that match search request".format(destination))
     else:
-        click.echo("Doesn't find any {0} that match search request".format(destination))
+        click.echo(json.dumps([repo._asdict() for repo in repos]))
 
 
 @click.command()
 @click.argument("url")
 @click.option("--repositories/--packages", default=True, help="Sort repositories or packages (default repositories)")
+@click.option("--table/--json", default=True, help="View mode")
 @click.option("--description", is_flag=True, help="Show description of packages or repositories (performs additional "
                                                   "request per repository)")
 @click.option("--rows", default=10, help="Number of showing repositories (default=10)")
 @click.option("--minstar", default=5, help="Minimum number of stars (default=5)")
 @click.option("--token", envvar="GHTOPDEP_TOKEN")
-def cli(url, repositories, rows, minstar, description, token):
+def cli(url, repositories, table, rows, minstar, description, token):
     if description and token:
         gh = github3.login(token=token)
         CacheControl(gh.session, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
@@ -134,4 +139,4 @@ def cli(url, repositories, rows, minstar, description, token):
             page_url = node[0].attributes["href"]
 
     sorted_repos = sort_repos(repos, rows)
-    show_result(sorted_repos, total_repos_count, more_than_zero_count, destination, destinations)
+    show_result(sorted_repos, total_repos_count, more_than_zero_count, destination, destinations, table)
