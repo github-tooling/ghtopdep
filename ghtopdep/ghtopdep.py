@@ -18,13 +18,21 @@ from halo import Halo
 from selectolax.parser import HTMLParser
 from tabulate import tabulate
 import appdirs
+import pipdate
 
-CACHE_DIR = appdirs.user_cache_dir("ghtopdep")
+from ghtopdep import __version__
+
+PACKAGE_NAME = "ghtopdep"
+CACHE_DIR = appdirs.user_cache_dir(PACKAGE_NAME)
 NEXT_BUTTON_SELECTOR = "#dependents > div.paginate-container > div > a"
 ITEM_SELECTOR = "#dependents > div.Box > div.flex-items-center"
 REPO_SELECTOR = "span > a.text-bold"
 STARS_SELECTOR = "div > span:nth-child(1)"
 GITHUB_URL = "https://github.com"
+
+if pipdate.needs_checking(PACKAGE_NAME):
+    msg = pipdate.check(PACKAGE_NAME, __version__.__version__)
+    click.echo(msg)
 
 
 class OneDayHeuristic(BaseHeuristic):
