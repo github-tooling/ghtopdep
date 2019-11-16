@@ -17,7 +17,9 @@ from cachecontrol.heuristics import BaseHeuristic
 from halo import Halo
 from selectolax.parser import HTMLParser
 from tabulate import tabulate
+import appdirs
 
+CACHE_DIR = appdirs.user_cache_dir("ghtopdep")
 NEXT_BUTTON_SELECTOR = "#dependents > div.paginate-container > div > a"
 ITEM_SELECTOR = "#dependents > div.Box > div.flex-items-center"
 REPO_SELECTOR = "span > a.text-bold"
@@ -82,7 +84,7 @@ def show_result(repos, total_repos_count, more_than_zero_count, destination, des
 def cli(url, repositories, search, table, rows, minstar, description, token):
     if (description or search) and token:
         gh = github3.login(token=token)
-        CacheControl(gh.session, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
+        CacheControl(gh.session, cache=FileCache(CACHE_DIR), heuristic=OneDayHeuristic())
     elif (description or search) and not token:
         click.echo("Please provide token")
         sys.exit()
@@ -105,7 +107,7 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
     spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots")
     spinner.start()
     sess = requests.session()
-    cached_sess = CacheControl(sess, cache=FileCache(".ghtopdep_cache"), heuristic=OneDayHeuristic())
+    cached_sess = CacheControl(sess, cache=FileCache(CACHE_DIR), heuristic=OneDayHeuristic())
     while True:
         response = cached_sess.get(page_url)
         parsed_node = HTMLParser(response.text)

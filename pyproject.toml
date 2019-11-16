@@ -1,11 +1,14 @@
 [tool.poetry]
 name = "ghtopdep"
-version = "0.3.0"
+version = "0.3.5"
 description = "CLI tool for sorting dependents repositories and packages by stars"
 authors = ["Andriy Orehov <andriyorehov@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/github-tooling/ghtopdep"
+
+[tool.poetry.urls]
+"Source" = "https://github.com/github-tooling/ghtopdep"
+"Bug Tracker" = "https://github.com/github-tooling/ghtopdep/issues"
 
 [tool.poetry.dependencies]
 python = "^3.5"
@@ -17,6 +20,8 @@ cachecontrol = "^0.12.5"
 lockfile = "^0.12.2"
 requests = "^2.22"
 "github3.py" = "^1.3"
+appdirs = "^1.4.3"
+pipdate = "^0.3.4"
 
 [tool.poetry.dev-dependencies]
 
