@@ -2,23 +2,24 @@ import calendar
 import json
 import sys
 import textwrap
-from urllib.parse import urlparse
 from collections import namedtuple
 from datetime import datetime, timedelta
 from email.utils import formatdate, parsedate
 from operator import attrgetter
+from urllib.parse import urlparse
 
+import appdirs
 import click
 import github3
+import pipdate
 import requests
-from cachecontrol import CacheControl
+from cachecontrol import CacheControl, CacheControlAdapter
 from cachecontrol.caches import FileCache
 from cachecontrol.heuristics import BaseHeuristic
 from halo import Halo
 from selectolax.parser import HTMLParser
 from tabulate import tabulate
-import appdirs
-import pipdate
+from urllib3.util.retry import Retry
 
 from ghtopdep import __version__
 
@@ -36,8 +37,14 @@ if pipdate.needs_checking(PACKAGE_NAME):
 
 
 class OneDayHeuristic(BaseHeuristic):
+    cacheable_by_default_statuses = {
+        200, 203, 204, 206, 300, 301, 404, 405, 410, 414, 501
+    }
 
     def update_headers(self, response):
+        if response.status not in self.cacheable_by_default_statuses:
+            return {}
+
         date = parsedate(response.headers["date"])
         expires = datetime(*date[:6]) + timedelta(days=1)
         return {"expires": formatdate(calendar.timegm(expires.timetuple())), "cache-control": "public"}
@@ -92,15 +99,16 @@ def show_result(repos, total_repos_count, more_than_zero_count, destination, des
 def cli(url, repositories, search, table, rows, minstar, description, token):
     if (description or search) and token:
         gh = github3.login(token=token)
-        CacheControl(gh.session, cache=FileCache(CACHE_DIR), heuristic=OneDayHeuristic())
+        CacheControl(gh.session,
+                     cache=FileCache(CACHE_DIR),
+                     heuristic=OneDayHeuristic())
     elif (description or search) and not token:
         click.echo("Please provide token")
         sys.exit()
 
+    Repo = namedtuple("Repo", ["url", "stars"])
     if description:
         Repo = namedtuple("Repo", ["url", "stars", "description"])
-    else:
-        Repo = namedtuple("Repo", ["url", "stars"])
 
     destination = "repository"
     destinations = "repositories"
@@ -114,10 +122,20 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
     total_repos_count = 0
     spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots")
     spinner.start()
+
     sess = requests.session()
-    cached_sess = CacheControl(sess, cache=FileCache(CACHE_DIR), heuristic=OneDayHeuristic())
+    retries = Retry(
+        total=15,
+        backoff_factor=15,
+        status_forcelist=[429])
+    adapter = CacheControlAdapter(max_retries=retries,
+                                  cache=FileCache(CACHE_DIR),
+                                  heuristic=OneDayHeuristic())
+    sess.mount('http://', adapter)
+    sess.mount('https://', adapter)
+
     while True:
-        response = cached_sess.get(page_url)
+        response = sess.get(page_url)
         parsed_node = HTMLParser(response.text)
         dependents = parsed_node.css(ITEM_SELECTOR)
         total_repos_count += len(dependents)
@@ -125,7 +143,7 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
             repo_stars_list = dep.css(STARS_SELECTOR)
             # only for ghost or private? packages
             if repo_stars_list:
-                repo_stars = dep.css(STARS_SELECTOR)[0].text().strip()
+                repo_stars = repo_stars_list[0].text().strip()
                 repo_stars_num = int(repo_stars.replace(",", ""))
             else:
                 continue
