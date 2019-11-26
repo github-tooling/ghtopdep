@@ -74,14 +74,14 @@ def sort_repos(repos, rows):
     return sorted_repos[:rows]
 
 
-def show_result(repos, total_repos_count, more_than_zero_count, destination, destinations, table):
+def show_result(repos, total_repos_count, more_than_zero_count, destinations, table):
     if table:
         if repos:
-            click.echo(tabulate(repos, headers="keys", tablefmt="grid"))
+            click.echo(tabulate(repos, headers="keys", tablefmt="github"))
             click.echo("found {0} {1} others {2} are private".format(total_repos_count, destinations, destinations))
             click.echo("found {0} {1} with more than zero star".format(more_than_zero_count, destinations))
         else:
-            click.echo("Doesn't find any {0} that match search request".format(destination))
+            click.echo("Doesn't find any {0} that match search request".format(destinations))
     else:
         click.echo(json.dumps([repo._asdict() for repo in repos]))
 
@@ -180,4 +180,4 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
             for s in gh.search_code("{0} repo:{1}".format(search, repo_path)):
                 click.echo("{0} with {1} stars".format(s.html_url, repo.stars))
     else:
-        show_result(sorted_repos, total_repos_count, more_than_zero_count, destination, destinations, table)
+        show_result(sorted_repos, total_repos_count, more_than_zero_count, destinations, table)
