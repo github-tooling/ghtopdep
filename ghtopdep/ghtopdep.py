@@ -74,9 +74,27 @@ def sort_repos(repos, rows):
     return sorted_repos[:rows]
 
 
+def humanize(num):
+    if num < 1_000:
+        return num
+    elif num < 10_000:
+        return "{}K".format(round(num / 100) / 10)
+    elif num < 1_000_000:
+        return "{}K".format(round(num / 1_000))
+    else:
+        return num
+
+
+def readable_stars(repos):
+    for i, repo in enumerate(repos):
+        repos[i] = repo._replace(stars=humanize(repo.stars))
+    return repos
+
+
 def show_result(repos, total_repos_count, more_than_zero_count, destinations, table):
     if table:
         if repos:
+            repos = readable_stars(repos)
             click.echo(tabulate(repos, headers="keys", tablefmt="github"))
             click.echo("found {0} {1} others {2} are private".format(total_repos_count, destinations, destinations))
             click.echo("found {0} {1} with more than zero star".format(more_than_zero_count, destinations))

@@ -78,32 +78,21 @@ Options:
 Table view (by default)
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js
-+---------------------------------------------------+---------+
-| url                                               |   stars |
-+===================================================+=========+
-| https://github.com/transloadit/uppy               |   20726 |
-+---------------------------------------------------+---------+
-| https://github.com/codesandbox/codesandbox-client |    7924 |
-+---------------------------------------------------+---------+
-| https://github.com/joemccann/dillinger            |    6452 |
-+---------------------------------------------------+---------+
-| https://github.com/keplergl/kepler.gl             |    5306 |
-+---------------------------------------------------+---------+
-| https://github.com/jitsi/jitsi-meet               |    4114 |
-+---------------------------------------------------+---------+
-| https://github.com/jsbin/jsbin                    |    3919 |
-+---------------------------------------------------+---------+
-| https://github.com/NorthwoodsSoftware/GoJS        |    3543 |
-+---------------------------------------------------+---------+
-| https://github.com/buttercup/buttercup-desktop    |    3004 |
-+---------------------------------------------------+---------+
-| https://github.com/openstyles/stylus              |    2101 |
-+---------------------------------------------------+---------+
-| https://github.com/mickael-kerjean/filestash      |    1610 |
-+---------------------------------------------------+---------+
-found 1583 repositories others repositories is private
-found 419 repositories with more than zero star
-~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.5.7 took 36s 
+| url                                               | stars   |
+|---------------------------------------------------|---------|
+| https://github.com/transloadit/uppy               | 21K     |
+| https://github.com/codesandbox/codesandbox-client | 8.6K    |
+| https://github.com/joemccann/dillinger            | 6.5K    |
+| https://github.com/keplergl/kepler.gl             | 5.8K    |
+| https://github.com/jitsi/jitsi-meet               | 4.5K    |
+| https://github.com/jsbin/jsbin                    | 4.0K    |
+| https://github.com/NorthwoodsSoftware/GoJS        | 3.8K    |
+| https://github.com/buttercup/buttercup-desktop    | 3.1K    |
+| https://github.com/openstyles/stylus              | 2.3K    |
+| https://github.com/mickael-kerjean/filestash      | 2.0K    |
+found 1660 repositories others repositories are private
+found 443 repositories with more than zero star
+~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.8.0 took 2m 57s 
 ```
 
 JSON view
@@ -116,31 +105,20 @@ you can sort packages and fetch their description
 
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --description --packages
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| url                                            |   stars | description                                                  |
-+================================================+=========+==============================================================+
-| https://github.com/jsbin/jsbin                 |    3919 | Collaborative JavaScript Debugging App                       |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/jvilk/BrowserFS             |    1497 | BrowserFS is an in-browser filesystem that emulates the...   |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/coderaiser/cloudcmd         |    1043 | ✨☁️📁✨ Cloud Commander file manager for the web with...       |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/node-red/node-red-web-nodes |     144 | A collection of node-red nodes aimed at web services         |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/robertknight/passcards      |     130 | A 1Password-compatible command-line and web-based...         |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/enyojs/ares-project         |     125 | A browser-based code editor and UI designer for Enyo 2...    |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/transloadit/uppy-server     |     115 | [DEPRECATED] 'Uppy Server' was renamed to 'Companion' and... |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/bioimagesuiteweb/bisweb     |      31 | This is the repository for the BioImage Suite Web Project    |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/sallar/dropbox-fs           |      29 | :package: Node FS wrapper for Dropbox                        |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-| https://github.com/filefog/filefog             |      26 | A thin cloud-service agnostic wrapper/interface to access... |
-+------------------------------------------------+---------+--------------------------------------------------------------+
-found 130 packages others packages are private
-found 57 packages with more than zero star
+| url                                            | stars   | description                                                  |
+|------------------------------------------------|---------|--------------------------------------------------------------|
+| https://github.com/jsbin/jsbin                 | 4.0K    | Collaborative JavaScript Debugging App                       |
+| https://github.com/jvilk/BrowserFS             | 1.9K    | BrowserFS is an in-browser filesystem that emulates the...   |
+| https://github.com/coderaiser/cloudcmd         | 1.1K    | ✨☁️📁✨ Cloud Commander file manager for the web with...       |
+| https://github.com/node-red/node-red-web-nodes | 153     | A collection of node-red nodes aimed at web services         |
+| https://github.com/robertknight/passcards      | 133     | A 1Password-compatible command-line and web-based...         |
+| https://github.com/enyojs/ares-project         | 125     | A browser-based code editor and UI designer for Enyo 2...    |
+| https://github.com/transloadit/uppy-server     | 114     | [DEPRECATED] 'Uppy Server' was renamed to 'Companion' and... |
+| https://github.com/bioimagesuiteweb/bisweb     | 34      | This is the repository for the BioImage Suite Web Project    |
+| https://github.com/sallar/dropbox-fs           | 30      | :package: Node FS wrapper for Dropbox                        |
+| https://github.com/filefog/filefog             | 26      | A thin cloud-service agnostic wrapper/interface to access... |
+found 140 packages others packages are private
+found 61 packages with more than zero star
 ```
 
 also ghtopdep support code searching at dependents (repositories/packages)
