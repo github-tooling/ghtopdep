@@ -2,10 +2,8 @@ import calendar
 import json
 import sys
 import textwrap
-from collections import namedtuple
-from datetime import datetime, timedelta
+import datetime
 from email.utils import formatdate, parsedate
-from operator import attrgetter
 from urllib.parse import urlparse
 
 import appdirs
@@ -46,7 +44,7 @@ class OneDayHeuristic(BaseHeuristic):
             return {}
 
         date = parsedate(response.headers["date"])
-        expires = datetime(*date[:6]) + timedelta(days=1)
+        expires = datetime.datetime(*date[:6]) + datetime.timedelta(days=1)
         return {"expires": formatdate(calendar.timegm(expires.timetuple())), "cache-control": "public"}
 
     def warning(self, response):
@@ -56,7 +54,7 @@ class OneDayHeuristic(BaseHeuristic):
 
 def already_added(repo_url, repos):
     for repo in repos:
-        if repo.url == repo_url:
+        if repo['url'] == repo_url:
             return True
 
 
@@ -70,7 +68,7 @@ def fetch_description(gh, relative_url):
 
 
 def sort_repos(repos, rows):
-    sorted_repos = sorted(repos, key=attrgetter("stars"), reverse=True)
+    sorted_repos = sorted(repos, key=lambda i: i["stars"], reverse=True)
     return sorted_repos[:rows]
 
 
@@ -86,8 +84,8 @@ def humanize(num):
 
 
 def readable_stars(repos):
-    for i, repo in enumerate(repos):
-        repos[i] = repo._replace(stars=humanize(repo.stars))
+    for repo in repos:
+        repo["stars"] = humanize(repo["stars"])
     return repos
 
 
@@ -101,7 +99,8 @@ def show_result(repos, total_repos_count, more_than_zero_count, destinations, ta
         else:
             click.echo("Doesn't find any {0} that match search request".format(destinations))
     else:
-        click.echo(json.dumps([repo._asdict() for repo in repos]))
+        data = json.dumps(repos)
+        click.echo(data)
 
 
 @click.command()
@@ -124,10 +123,6 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
         click.echo("Please provide token")
         sys.exit()
 
-    Repo = namedtuple("Repo", ["url", "stars"])
-    if description:
-        Repo = namedtuple("Repo", ["url", "stars", "description"])
-
     destination = "repository"
     destinations = "repositories"
     if not repositories:
@@ -149,8 +144,8 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
     adapter = CacheControlAdapter(max_retries=retries,
                                   cache=FileCache(CACHE_DIR),
                                   heuristic=OneDayHeuristic())
-    sess.mount('http://', adapter)
-    sess.mount('https://', adapter)
+    sess.mount("http://", adapter)
+    sess.mount("https://", adapter)
 
     while True:
         response = sess.get(page_url)
@@ -177,9 +172,16 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
                 if not is_already_added and repo_url != url:
                     if description:
                         repo_description = fetch_description(gh, relative_repo_url)
-                        repos.append(Repo(repo_url, repo_stars_num, repo_description))
+                        repos.append({
+                            "url": repo_url,
+                            "stars": repo_stars_num,
+                            "description": repo_description
+                        })
                     else:
-                        repos.append(Repo(repo_url, repo_stars_num))
+                        repos.append({
+                            "url": repo_url,
+                            "stars": repo_stars_num
+                        })
 
         node = parsed_node.css(NEXT_BUTTON_SELECTOR)
         if len(node) == 2:
@@ -194,8 +196,8 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
 
     if search:
         for repo in repos:
-            repo_path = urlparse(repo.url).path[1:]
+            repo_path = urlparse(repo["url"]).path[1:]
             for s in gh.search_code("{0} repo:{1}".format(search, repo_path)):
-                click.echo("{0} with {1} stars".format(s.html_url, repo.stars))
+                click.echo("{0} with {1} stars".format(s.html_url, repo["stars"]))
     else:
         show_result(sorted_repos, total_repos_count, more_than_zero_count, destinations, table)
