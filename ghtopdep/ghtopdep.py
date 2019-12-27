@@ -1,5 +1,6 @@
 import calendar
 import json
+import os
 import sys
 import textwrap
 import datetime
@@ -99,21 +100,37 @@ def show_result(repos, total_repos_count, more_than_zero_count, destinations, ta
         else:
             click.echo("Doesn't find any {0} that match search request".format(destinations))
     else:
-        data = json.dumps(repos)
-        click.echo(data)
+        click.echo(json.dumps(repos))
 
 
 @click.command()
 @click.argument("url")
 @click.option("--repositories/--packages", default=True, help="Sort repositories or packages (default repositories)")
 @click.option("--table/--json", default=True, help="View mode")
+@click.option("--report", is_flag=True, help="Report")
 @click.option("--description", is_flag=True, help="Show description of packages or repositories (performs additional "
                                                   "request per repository)")
 @click.option("--rows", default=10, help="Number of showing repositories (default=10)")
 @click.option("--minstar", default=5, help="Minimum number of stars (default=5)")
 @click.option("--search", help="search code at dependents (repositories/packages)")
 @click.option("--token", envvar="GHTOPDEP_TOKEN")
-def cli(url, repositories, search, table, rows, minstar, description, token):
+def cli(url, repositories, search, table, rows, minstar, report, description, token):
+    MODE = os.environ.get("GHTOPDEP_ENV")
+    BASE_URL = 'https://437w61gcj1.execute-api.us-west-2.amazonaws.com/api'
+    if MODE == "development":
+        BASE_URL = 'http://127.0.0.1:8080'
+
+    if report:
+        try:
+            result = requests.get('{}/repos?url={}'.format(BASE_URL, url))
+            if result.status_code != 404:
+                sorted_repos = sort_repos(result.json()['deps'], rows)
+                repos = readable_stars(sorted_repos)
+                click.echo(tabulate(repos, headers="keys", tablefmt="github"))
+                sys.exit()
+        except requests.exceptions.ConnectionError as e:
+            click.echo(e)
+
     if (description or search) and token:
         gh = github3.login(token=token)
         CacheControl(gh.session,
@@ -191,6 +208,12 @@ def cli(url, repositories, search, table, rows, minstar, description, token):
             break
         elif node[0].text() == "Next":
             page_url = node[0].attributes["href"]
+
+    if report:
+        try:
+            requests.post('{}/repos'.format(BASE_URL), json={"url": url, "deps": repos})
+        except requests.exceptions.ConnectionError as e:
+            click.echo(e)
 
     sorted_repos = sort_repos(repos, rows)
 

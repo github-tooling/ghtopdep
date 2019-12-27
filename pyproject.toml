@@ -24,6 +24,8 @@ appdirs = "^1.4.3"
 pipdate = "^0.3.4"
 
 [tool.poetry.dev-dependencies]
+better_exceptions = "^0.2.2"
+pysnooper = "^0.3.0"
 
 [tool.poetry.scripts]
 ghtopdep = 'ghtopdep.ghtopdep:cli'
