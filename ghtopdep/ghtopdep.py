@@ -116,9 +116,9 @@ def get_page_url(sess, url, destination):
             parsed_item = HTMLParser(res.text)
             package_id = urlparse(i.attributes["href"]).query.split("=")[1]
             selector = '.table-list-filters a:first-child'
-            count = parsed_item.css(selector)[0].text().split()[0]
-            packages.append({"count": count, "package_id": package_id})
-        sorted_packages = sorted(packages, key=lambda k: k['count'].replace(",", ""), reverse=True)
+            count = parsed_item.css(selector)[0].text().split()[0].replace(",", "")
+            packages.append({"count": int(count), "package_id": package_id})
+        sorted_packages = sorted(packages, key=lambda k: k['count'], reverse=True)
         most_popular_package_id = sorted_packages[0].get("package_id")
         page_url = "{0}/network/dependents?dependent_type={1}&package_id={2}".format(url, destination.upper(),
                                                                                      most_popular_package_id)
