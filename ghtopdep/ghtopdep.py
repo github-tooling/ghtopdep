@@ -16,7 +16,7 @@ from urllib3.util.retry import Retry
 from cachecontrol.caches import FileCache
 from cachecontrol.heuristics import BaseHeuristic
 from cachecontrol import CacheControl, CacheControlAdapter
-from halo import Halo
+import progressbar
 from selectolax.parser import HTMLParser
 from tabulate import tabulate
 
@@ -103,10 +103,14 @@ def show_result(repos, total_repos_count, more_than_zero_count, destinations, ta
         click.echo(json.dumps(repos))
 
 
-def get_page_url(sess, url, destination):
+def get_page_url_and_max_deps(sess, url, destination):
     page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
     main_response = sess.get(page_url)
     parsed_node = HTMLParser(main_response.text)
+
+    deps_cnt_element = parsed_node.css_first('.table-list-header-toggle .btn-link.selected')
+    max_deps = int(list(filter(None, [s.strip() for s in deps_cnt_element.text().split('\n')]))[0].replace(',', ''))
+
     link = parsed_node.css('.select-menu-item')
     if link:
         packages = []
@@ -122,7 +126,7 @@ def get_page_url(sess, url, destination):
         most_popular_package_id = sorted_packages[0].get("package_id")
         page_url = "{0}/network/dependents?dependent_type={1}&package_id={2}".format(url, destination.upper(),
                                                                                      most_popular_package_id)
-    return page_url
+    return page_url, max_deps
 
 
 @click.command()
@@ -171,8 +175,6 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
     repos = []
     more_than_zero_count = 0
     total_repos_count = 0
-    spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots")
-    spinner.start()
 
     sess = requests.session()
     retries = Retry(
@@ -185,7 +187,14 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
     sess.mount("http://", adapter)
     sess.mount("https://", adapter)
 
-    page_url = get_page_url(sess, url, destination)
+    page_url, max_deps = get_page_url_and_max_deps(sess, url, destination)
+    widgets=[
+        ' [', progressbar.Timer(), '] ',
+        progressbar.Bar(),
+        ' (', progressbar.ETA(), ') ',
+    ]
+    bar = progressbar.ProgressBar(maxval=max_deps, widgets=widgets)
+    bar.start()
 
     while True:
         response = sess.get(page_url)
@@ -227,11 +236,12 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
         if len(node) == 2:
             page_url = node[1].attributes["href"]
         elif len(node) == 0 or node[0].text() == "Previous":
-            spinner.stop()
             break
         elif node[0].text() == "Next":
             page_url = node[0].attributes["href"]
+        bar.update(total_repos_count)
 
+    bar.finish()
     if report:
         try:
             requests.post('{}/repos'.format(BASE_URL), json={"url": url, "deps": repos})
