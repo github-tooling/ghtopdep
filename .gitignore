@@ -3,3 +3,5 @@ example
 ghtopdep.egg-info
 .ghtopdep_cache/
 dist/
+*.pyc
+.vscode

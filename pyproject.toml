@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ghtopdep"
-version = "0.3.12"
+version = "0.3.13"
 description = "CLI tool for sorting dependents repositories and packages by stars"
 authors = ["Andriy Orehov <andriyorehov@gmail.com>"]
 license = "MIT"
@@ -12,7 +12,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.5"
-selectolax = "^0.1.13"
+selectolax = "^0.2.12"
 tabulate = "^0.8.3"
 click = "^7.0"
 halo = "^0.0.26"

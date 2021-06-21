@@ -1,4 +1,5 @@
 # GHTOPDEP
+
 [![image](https://img.shields.io/pypi/v/ghtopdep.svg)](https://pypi.org/project/ghtopdep/)
 [![image](https://img.shields.io/pypi/l/ghtopdep.svg)](https://pypi.org/project/ghtopdep/)
 [![image](https://img.shields.io/pypi/pyversions/ghtopdep.svg)](https://pypi.org/project/ghtopdep/)
@@ -6,21 +7,26 @@
 CLI tool for sorting dependents repo by stars
 
 ## Requirements
-* Python 3.5 and up
-* Python development libraries
+
+- Python 3.5 and up
+- Python development libraries
 
 ## Installation
+
 from PyPI
+
 ```
 $ pip install ghtopdep
 ```
 
 from git repository
+
 ```
 $ pip install git+https://github.com/github-tooling/ghtopdep.git#egg=ghtopdep
 ```
 
 from source
+
 ```
 $ git clone https://github.com/github-tooling/ghtopdep
 $ cd ghtopdep
@@ -30,16 +36,19 @@ $ python setup.py install
 ## Python development Installation
 
 Ubuntu/Debian
+
 ```
 sudo apt install python3-dev
 ```
 
 CentOS/RHEL
+
 ```
 sudo yum install python3-devel
 ```
 
 ## Version upgrade
+
 ```
 ➜ pip install --upgrade ghtopdep
 ```
@@ -48,12 +57,12 @@ sudo yum install python3-devel
 
 If you want retrieve packages or repositories description you need pass token.
 To prevent rale limit being exceeded for unauthentIcated requests, ghtopdep needs an access token.
-For public repositories, [create a token](https://github.com/settings/tokens/new?scopes=public_repo&description=ghtopdep) 
+For public repositories, [create a token](https://github.com/settings/tokens/new?scopes=public_repo&description=ghtopdep)
 with the public_repo permission.
 
-You can use token as environment variable ``GHTOPDEP_TOKEN`` at ``~/.bashrc`` or ``~/.zshrc`` 
+You can use token as environment variable `GHTOPDEP_TOKEN` at `~/.bashrc` or `~/.zshrc`
 
-export GHTOPDEP_TOKEN="****************************************"
+export GHTOPDEP_TOKEN="**\*\*\*\***\*\***\*\*\*\***\*\*\*\***\*\*\*\***\*\***\*\*\*\***"
 
 or pass token as option --token
 
@@ -76,6 +85,7 @@ Options:
 ```
 
 Table view (by default)
+
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js
 | url                                               | stars   |
@@ -92,16 +102,17 @@ Table view (by default)
 | https://github.com/mickael-kerjean/filestash      | 2.0K    |
 found 1660 repositories others repositories are private
 found 443 repositories with more than zero star
-~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.8.0 took 2m 57s 
+~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.8.0 took 2m 57s
 ```
 
 JSON view
+
 ```
-➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --json         
+➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --json
 [{"url": "https://github.com/transloadit/uppy", "stars": 21191}, {"url": "https://github.com/codesandbox/codesandbox-client", "stars": 8386}, {"url": "https://github.com/joemccann/dillinger", "stars": 6491}, {"url": "https://github.com/keplergl/kepler.gl", "stars": 5615}, {"url": "https://github.com/jitsi/jitsi-meet", "stars": 4303}, {"url": "https://github.com/jsbin/jsbin", "stars": 3947}, {"url": "https://github.com/NorthwoodsSoftware/GoJS", "stars": 3692}, {"url": "https://github.com/buttercup/buttercup-desktop", "stars": 3054}, {"url": "https://github.com/openstyles/stylus", "stars": 2219}, {"url": "https://github.com/mickael-kerjean/filestash", "stars": 1869}]
 ```
 
-you can sort packages and fetch their description 
+you can sort packages and fetch their description
 
 ```
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --description --packages
@@ -134,16 +145,24 @@ https://github.com/openstate/allmanak/blob/e6d7aa72a8878eefc6f63a27c983894de1cef
 https://github.com/wolbodo/members/blob/d091f1e44b4e8cb8cc31f39ea6f6e9c36211d019/sapper/src/components/Member.html with 1 stars
 ```
 
-
 ## Development setup
-Using [Poetry](https://poetry.eustace.io/docs/)   
+
+Using [Poetry](https://poetry.eustace.io/docs/)
+
 ```
 $ poetry install
+$ poetry run ghtopdep https://github.com/dropbox/dropbox-sdk-js
+$ dephell deps convert --from=pyproject.toml --to=setup.py
+$ poetry build
+$ poetry publish
 ```
-or [Pipenv](https://docs.pipenv.org/)   
+
+or [Pipenv](https://docs.pipenv.org/)
+
 ```
 $ pipenv install --dev -e .
 ```
 
 ## License
+
 [MIT](https://choosealicense.com/licenses/mit/)
