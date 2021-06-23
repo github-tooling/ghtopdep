@@ -33,6 +33,14 @@ $ cd ghtopdep
 $ python setup.py install
 ```
 
+from Arch User Repository (if you're using Arch Linux)
+
+```
+$ git clone https://aur.archlinux.org/python-ghtopdep.git
+$ cd python-ghtopdep
+$ makepkg -si
+```
+
 ## Python development Installation
 
 Ubuntu/Debian
