@@ -138,15 +138,17 @@ def get_page_url(sess, url, destination):
 @click.option("--token", envvar="GHTOPDEP_TOKEN")
 def cli(url, repositories, search, table, rows, minstar, report, description, token):
     MODE = os.environ.get("GHTOPDEP_ENV")
-    BASE_URL = 'https://437w61gcj1.execute-api.us-west-2.amazonaws.com/api'
+    BASE_URL = 'http://159.223.231.170'
     if MODE == "development":
-        BASE_URL = 'http://127.0.0.1:8080'
+        BASE_URL = 'http://127.0.0.1:3000'
+
+    owner, repository = urlparse(url).path[1:].split("/")
 
     if report:
         try:
-            result = requests.get('{}/repos?url={}'.format(BASE_URL, url))
+            result = requests.get('{}/repos/{}/{}'.format(BASE_URL, owner, repository))
             if result.status_code != 404:
-                sorted_repos = sort_repos(result.json()['deps'], rows)
+                sorted_repos = sort_repos(result.json(), rows)
                 repos = readable_stars(sorted_repos)
                 click.echo(tabulate(repos, headers="keys", tablefmt="github"))
                 sys.exit()
@@ -234,7 +236,7 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
 
     if report:
         try:
-            requests.post('{}/repos'.format(BASE_URL), json={"url": url, "deps": repos})
+            requests.post('{}/repos'.format(BASE_URL), json={"url": url, "owner": owner, "repository": repository, "deps": repos})
         except requests.exceptions.ConnectionError as e:
             click.echo(e)
 
