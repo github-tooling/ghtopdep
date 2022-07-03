@@ -34,7 +34,7 @@ setup(
     packages=[],
     package_dir={"": "."},
     package_data={},
-    install_requires=['appdirs==1.*,>=1.4.3', 'cachecontrol==0.*,>=0.12.5', 'click==7.*,>=7.0.0', 'github3.py==1.*,>=1.3.0', 'halo==0.*,>=0.0.26',
+    install_requires=['appdirs==1.*,>=1.4.3', 'cachecontrol==0.*,>=0.12.5', 'click==7.*,>=7.0.0', 'github3.py==3.*,>=3.2.0', 'halo==0.*,>=0.0.26',
                       'lockfile==0.*,>=0.12.2', 'pipdate==0.*,>=0.3.4', 'requests==2.*,>=2.22.0', 'selectolax==0.*,>=0.2.12', 'tabulate==0.*,>=0.8.3'],
     extras_require={
         "dev": ["better-exceptions==0.*,>=0.2.2", "pysnooper==0.*,>=0.3.0"]},
