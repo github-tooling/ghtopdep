@@ -157,6 +157,8 @@ $ poetry build
 $ poetry publish
 ```
 
+[poetry2setup: Convert python-poetry(pyproject.toml) to setup.py.](https://github.com/abersheeran/poetry2setup)
+
 or [Pipenv](https://docs.pipenv.org/)
 
 ```
