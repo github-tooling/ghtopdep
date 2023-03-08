@@ -13,19 +13,19 @@ CLI tool for sorting dependents repo by stars
 
 ## Installation
 
-from PyPI
+### From PyPI
 
 ```sh
 $ pip install ghtopdep
 ```
 
-from git repository
+### From git repository
 
 ```sh
 $ pip install git+https://github.com/github-tooling/ghtopdep.git#egg=ghtopdep
 ```
 
-from source
+### From source
 
 ```sh
 $ git clone https://github.com/github-tooling/ghtopdep
@@ -33,15 +33,31 @@ $ cd ghtopdep
 $ python setup.py install
 ```
 
+### Using docker (from source)
+
+First `docker build` the image once:
+
+```sh
+$ git clone https://github.com/github-tooling/ghtopdep
+$ cd ghtopdep
+$ docker build . -t ghtopdep
+```
+
+Then you can `docker run` it:
+
+```sh
+$ docker run --rm -it ghtopdep --help
+```
+
 ## Python development Installation
 
-Ubuntu/Debian
+### Ubuntu/Debian
 
 ```sh
 sudo apt install python3-dev
 ```
 
-CentOS/RHEL
+### CentOS/RHEL
 
 ```sh
 sudo yum install python3-devel
@@ -84,7 +100,7 @@ Options:
   --help                       Show this message and exit.
 ```
 
-Table view (by default)
+### Table view (by default)
 
 ```sh
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js
@@ -105,7 +121,7 @@ found 443 repositories with more than zero star
 ~ via ⬢ v12.5.0 via 🐘 v7.2.19 via 🐍 3.8.0 took 2m 57s
 ```
 
-JSON view
+### JSON view
 
 ```sh
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --json
