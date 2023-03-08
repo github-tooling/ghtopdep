@@ -15,19 +15,19 @@ CLI tool for sorting dependents repo by stars
 
 from PyPI
 
-```
+```sh
 $ pip install ghtopdep
 ```
 
 from git repository
 
-```
+```sh
 $ pip install git+https://github.com/github-tooling/ghtopdep.git#egg=ghtopdep
 ```
 
 from source
 
-```
+```sh
 $ git clone https://github.com/github-tooling/ghtopdep
 $ cd ghtopdep
 $ python setup.py install
@@ -37,19 +37,19 @@ $ python setup.py install
 
 Ubuntu/Debian
 
-```
+```sh
 sudo apt install python3-dev
 ```
 
 CentOS/RHEL
 
-```
+```sh
 sudo yum install python3-devel
 ```
 
 ## Version upgrade
 
-```
+```sh
 ➜ pip install --upgrade ghtopdep
 ```
 
@@ -66,7 +66,7 @@ export GHTOPDEP_TOKEN="**\*\*\*\***\*\***\*\*\*\***\*\*\*\***\*\*\*\***\*\***\*\
 
 or pass token as option --token
 
-```
+```sh
 ➜ ghtopdep --help
 Usage: ghtopdep [OPTIONS] URL
 
@@ -86,7 +86,7 @@ Options:
 
 Table view (by default)
 
-```
+```sh
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js
 | url                                               | stars   |
 |---------------------------------------------------|---------|
@@ -107,14 +107,14 @@ found 443 repositories with more than zero star
 
 JSON view
 
-```
+```sh
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --json
 [{"url": "https://github.com/transloadit/uppy", "stars": 21191}, {"url": "https://github.com/codesandbox/codesandbox-client", "stars": 8386}, {"url": "https://github.com/joemccann/dillinger", "stars": 6491}, {"url": "https://github.com/keplergl/kepler.gl", "stars": 5615}, {"url": "https://github.com/jitsi/jitsi-meet", "stars": 4303}, {"url": "https://github.com/jsbin/jsbin", "stars": 3947}, {"url": "https://github.com/NorthwoodsSoftware/GoJS", "stars": 3692}, {"url": "https://github.com/buttercup/buttercup-desktop", "stars": 3054}, {"url": "https://github.com/openstyles/stylus", "stars": 2219}, {"url": "https://github.com/mickael-kerjean/filestash", "stars": 1869}]
 ```
 
 you can sort packages and fetch their description
 
-```
+```sh
 ➜ ghtopdep https://github.com/dropbox/dropbox-sdk-js --description --packages
 | url                                            | stars   | description                                                  |
 |------------------------------------------------|---------|--------------------------------------------------------------|
@@ -134,7 +134,7 @@ found 61 packages with more than zero star
 
 also ghtopdep support code searching at dependents (repositories/packages)
 
-```
+```sh
 ➜ ghtopdep https://github.com/rob-balfre/svelte-select --search=isMulti --minstar=0
 https://github.com/andriyor/linkorg-frontend/blob/7eed49c332f127c8541281b85def80e54c882920/src/App.svelte with 0 stars
 https://github.com/andriyor/linkorg-frontend/blob/7eed49c332f127c8541281b85def80e54c882920/src/providers/Post.svelte with 0 stars
@@ -149,7 +149,7 @@ https://github.com/wolbodo/members/blob/d091f1e44b4e8cb8cc31f39ea6f6e9c36211d019
 
 Using [Poetry](https://poetry.eustace.io/docs/)
 
-```
+```sh
 $ poetry install
 $ poetry run ghtopdep https://github.com/dropbox/dropbox-sdk-js
 $ dephell deps convert --from=pyproject.toml --to=setup.py
@@ -161,7 +161,7 @@ $ poetry publish
 
 or [Pipenv](https://docs.pipenv.org/)
 
-```
+```sh
 $ pipenv install --dev -e .
 ```
 
