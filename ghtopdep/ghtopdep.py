@@ -173,7 +173,7 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
     repos = []
     more_than_zero_count = 0
     total_repos_count = 0
-    spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots")
+    spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots", stream=sys.stderr)
     spinner.start()
 
     sess = requests.session()
