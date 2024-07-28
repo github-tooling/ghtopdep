@@ -103,28 +103,6 @@ def show_result(repos, total_repos_count, more_than_zero_count, destinations, ta
         click.echo(json.dumps(repos))
 
 
-def get_page_url(sess, url, destination):
-    page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
-    main_response = sess.get(page_url)
-    parsed_node = HTMLParser(main_response.text)
-    link = parsed_node.css('.select-menu-item')
-    if link:
-        packages = []
-        for i in link:
-            repo_url = "https://github.com/{}".format(i.attributes['href'])
-            res = requests.get(repo_url)
-            parsed_item = HTMLParser(res.text)
-            package_id = urlparse(i.attributes["href"]).query.split("=")[1]
-            selector = '.table-list-filters a:first-child'
-            count = parsed_item.css(selector)[0].text().split()[0].replace(",", "")
-            packages.append({"count": int(count), "package_id": package_id})
-        sorted_packages = sorted(packages, key=lambda k: k['count'], reverse=True)
-        most_popular_package_id = sorted_packages[0].get("package_id")
-        page_url = "{0}/network/dependents?dependent_type={1}&package_id={2}".format(url, destination.upper(),
-                                                                                     most_popular_package_id)
-    return page_url
-
-
 @click.command()
 @click.argument("url")
 @click.option("--repositories/--packages", default=True, help="Sort repositories or packages (default repositories)")
@@ -187,7 +165,7 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
     sess.mount("http://", adapter)
     sess.mount("https://", adapter)
 
-    page_url = get_page_url(sess, url, destination)
+    page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
 
     while True:
         response = sess.get(page_url)
