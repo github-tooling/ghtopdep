@@ -173,3 +173,4 @@ $ pipenv install --dev -e .
 
 [ghtracker](https://github.com/zer0yu/ghtracker) - not provide full result https://github.com/zer0yu/ghtracker/issues/2
 
+[github-by-stars](https://github.com/hacker-DOM/github-by-stars) - complex setup
