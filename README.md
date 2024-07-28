@@ -168,3 +168,8 @@ $ pipenv install --dev -e .
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Alternatives
+
+[ghtracker](https://github.com/zer0yu/ghtracker) - not provide full result https://github.com/zer0yu/ghtracker/issues/2
+
