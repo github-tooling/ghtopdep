@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ghtopdep"
-version = "0.3.14"
+version = "0.4.1"
 description = "CLI tool for sorting dependents repositories and packages by stars"
 authors = ["Andriy Orehov <andriyorehov@gmail.com>"]
 license = "MIT"
@@ -15,7 +15,7 @@ python = "^3.7"
 selectolax = "^0.3.7"
 tabulate = "^0.8.3"
 click = "^8.1.2"
-cachecontrol = "^0.12.5"
+cachecontrol = "^0.14.0"
 lockfile = "^0.12.2"
 requests = "^2.22"
 "github3.py" = "^3.2.0"
