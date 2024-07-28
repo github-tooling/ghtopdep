@@ -174,3 +174,10 @@ $ pipenv install --dev -e .
 [ghtracker](https://github.com/zer0yu/ghtracker) - not provide full result https://github.com/zer0yu/ghtracker/issues/2
 
 [github-by-stars](https://github.com/hacker-DOM/github-by-stars) - complex setup
+
+
+## References
+
+[Allow dependents to be sorted by stars · Issue #1537 · isaacs/github](https://github.com/isaacs/github/issues/1537)
+
+[Sorting the insights dependency graph lists · community · Discussion #5575](https://github.com/orgs/community/discussions/5575)
