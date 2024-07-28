@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ghtopdep"
-version = "0.4.1"
+version = "0.4.2"
 description = "CLI tool for sorting dependents repositories and packages by stars"
 authors = ["Andriy Orehov <andriyorehov@gmail.com>"]
 license = "MIT"
@@ -15,12 +15,12 @@ python = "^3.7"
 selectolax = "^0.3.7"
 tabulate = "^0.8.3"
 click = "^8.1.2"
-cachecontrol = "^0.14.0"
-lockfile = "^0.12.2"
 requests = "^2.22"
-"github3.py" = "^3.2.0"
+"github3.py" = "^4.0.1"
 appdirs = "^1.4.4"
 pipdate = "^0.5.6"
+cachecontrol = {extras = ["filecache"], version = "^0.14.0"}
+tqdm = "^4.66.4"
 
 [tool.poetry.dev-dependencies]
 better_exceptions = "^0.2.2"
