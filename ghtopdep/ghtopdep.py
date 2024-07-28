@@ -16,7 +16,7 @@ from urllib3.util.retry import Retry
 from cachecontrol.caches import FileCache
 from cachecontrol.heuristics import BaseHeuristic
 from cachecontrol import CacheControl, CacheControlAdapter
-from halo import Halo
+from tqdm import tqdm
 from selectolax.parser import HTMLParser
 from tabulate import tabulate
 
@@ -29,6 +29,7 @@ ITEM_SELECTOR = "#dependents > div.Box > div.flex-items-center"
 REPO_SELECTOR = "span > a.text-bold"
 STARS_SELECTOR = "div > span:nth-child(1)"
 GITHUB_URL = "https://github.com"
+REPOS_PER_PAGE = 30
 
 if pipdate.needs_checking(PACKAGE_NAME):
     msg = pipdate.check(PACKAGE_NAME, __version__.__version__)
@@ -103,6 +104,15 @@ def show_result(repos, total_repos_count, more_than_zero_count, destinations, ta
         click.echo(json.dumps(repos))
 
 
+def get_max_deps(sess, url):
+    main_response = sess.get(url)
+    parsed_node = HTMLParser(main_response.text)
+
+    deps_count_element = parsed_node.css_first('.table-list-header-toggle .btn-link.selected')
+    max_deps = int(deps_count_element.text().strip().split()[0].replace(',', ''))
+    return max_deps
+
+
 @click.command()
 @click.argument("url")
 @click.option("--repositories/--packages", default=True, help="Sort repositories or packages (default repositories)")
@@ -151,8 +161,6 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
     repos = []
     more_than_zero_count = 0
     total_repos_count = 0
-    spinner = Halo(text="Fetching information about {0}".format(destinations), spinner="dots")
-    spinner.start()
 
     sess = requests.session()
     retries = Retry(
@@ -166,6 +174,10 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
     sess.mount("https://", adapter)
 
     page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
+    
+    max_deps = get_max_deps(sess, page_url)
+
+    pbar = tqdm(total=max_deps)
 
     while True:
         response = sess.get(page_url)
@@ -210,8 +222,11 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
         elif pagination_buttons[0].text() == "Next":
             page_url = pagination_buttons[0].attributes["href"]
         elif len(pagination_buttons) == 0 or pagination_buttons[0].text() == "Previous":
-            spinner.stop()
             break
+
+        pbar.update(REPOS_PER_PAGE)
+
+    pbar.close()
 
     if report:
         try:
