@@ -219,7 +219,7 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
 
         if len(pagination_buttons) == 2:
             page_url = pagination_buttons[1].attributes["href"]
-        elif pagination_buttons[0].text() == "Next":
+        elif pagination_buttons and pagination_buttons[0].text() == "Next":
             page_url = pagination_buttons[0].attributes["href"]
         elif len(pagination_buttons) == 0 or pagination_buttons[0].text() == "Previous":
             break
