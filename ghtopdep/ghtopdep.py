@@ -1,8 +1,8 @@
 import calendar
 import json
 import os
+import re
 import sys
-import textwrap
 import datetime
 from email.utils import formatdate, parsedate
 from urllib.parse import urlparse
@@ -21,6 +21,9 @@ from selectolax.parser import HTMLParser
 from tabulate import tabulate
 
 from ghtopdep import __version__
+from ghtopdep.rate_limiter import TokenBucketRateLimiter
+from ghtopdep.graphql_enrich import enrich_descriptions
+from ghtopdep.prefetch import PagePrefetcher
 
 PACKAGE_NAME = "ghtopdep"
 CACHE_DIR = appdirs.user_cache_dir(PACKAGE_NAME)
@@ -52,21 +55,6 @@ class OneDayHeuristic(BaseHeuristic):
     def warning(self, response):
         msg = "Automatically cached! Response is Stale."
         return "110 - {0}".format(msg)
-
-
-def already_added(repo_url, repos):
-    for repo in repos:
-        if repo['url'] == repo_url:
-            return True
-
-
-def fetch_description(gh, relative_url):
-    _, owner, repository = relative_url.split("/")
-    repository = gh.repository(owner, repository)
-    repo_description = " "
-    if repository.description:
-        repo_description = textwrap.shorten(repository.description, width=60, placeholder="...")
-    return repo_description
 
 
 def sort_repos(repos, rows):
@@ -104,13 +92,19 @@ def show_result(repos, total_repos_count, more_than_zero_count, destinations, ta
         click.echo(json.dumps(repos))
 
 
-def get_max_deps(sess, url):
-    main_response = sess.get(url)
-    parsed_node = HTMLParser(main_response.text)
-
-    deps_count_element = parsed_node.css_first('.table-list-header-toggle .btn-link.selected')
-    max_deps = int(deps_count_element.text().strip().split()[0].replace(',', ''))
-    return max_deps
+def parse_dependent_counts(html):
+    """Extract repo/package dependent counts from a dependents page."""
+    tree = HTMLParser(html)
+    counts = {}
+    for link in tree.css("div.table-list-header-toggle a.btn-link"):
+        text = link.text(strip=True)
+        match = re.match(r"([\d,]+)\s+(Repositor(?:ies|y)|Packages?)\s*$", text)
+        if match:
+            count = int(match.group(1).replace(",", ""))
+            kind = match.group(2)
+            key = "REPOSITORY" if kind.startswith("Repositor") else "PACKAGE"
+            counts[key] = count
+    return counts
 
 
 @click.command()
@@ -143,14 +137,16 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
         except requests.exceptions.ConnectionError as e:
             click.echo(e)
 
-    if (description or search) and token:
+    if (description or search) and not token:
+        click.echo("Please provide token")
+        sys.exit()
+
+    gh = None
+    if search and token:
         gh = github3.login(token=token)
         CacheControl(gh.session,
                      cache=FileCache(CACHE_DIR),
                      heuristic=OneDayHeuristic())
-    elif (description or search) and not token:
-        click.echo("Please provide token")
-        sys.exit()
 
     destination = "repository"
     destinations = "repositories"
@@ -159,29 +155,42 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
         destinations = "packages"
 
     repos = []
+    seen_urls = set()
     more_than_zero_count = 0
     total_repos_count = 0
 
     sess = requests.session()
     retries = Retry(
-        total=15,
-        backoff_factor=15,
-        status_forcelist=[429])
+        total=5,
+        backoff_factor=5,
+        backoff_max=120,
+        status_forcelist=[429, 500, 502, 503])
     adapter = CacheControlAdapter(max_retries=retries,
                                   cache=FileCache(CACHE_DIR),
                                   heuristic=OneDayHeuristic())
     sess.mount("http://", adapter)
     sess.mount("https://", adapter)
 
-    page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
-    
-    max_deps = get_max_deps(sess, page_url)
+    limiter = TokenBucketRateLimiter(
+        rate=60 if token else 10,
+        period=60.0
+    )
+    prefetcher = PagePrefetcher(sess, limiter)
 
-    pbar = tqdm(total=max_deps)
+    page_url = "{0}/network/dependents?dependent_type={1}".format(url, destination.upper())
+
+    pbar = None
 
     while True:
-        response = sess.get(page_url)
-        parsed_node = HTMLParser(response.text)
+        html = prefetcher.get(page_url)
+        parsed_node = HTMLParser(html)
+
+        if pbar is None:
+            counts = parse_dependent_counts(html)
+            dep_type_key = destination.upper()
+            max_deps = counts.get(dep_type_key, 0)
+            pbar = tqdm(total=max_deps if max_deps > 0 else None)
+
         dependents = parsed_node.css(ITEM_SELECTOR)
         total_repos_count += len(dependents)
         for dep in dependents:
@@ -199,34 +208,32 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
                 relative_repo_url = dep.css(REPO_SELECTOR)[0].attributes["href"]
                 repo_url = "{0}{1}".format(GITHUB_URL, relative_repo_url)
 
-                # can be listed same package
-                is_already_added = already_added(repo_url, repos)
-                if not is_already_added and repo_url != url:
-                    if description:
-                        repo_description = fetch_description(gh, relative_repo_url)
-                        repos.append({
-                            "url": repo_url,
-                            "stars": repo_stars_num,
-                            "description": repo_description
-                        })
-                    else:
-                        repos.append({
-                            "url": repo_url,
-                            "stars": repo_stars_num
-                        })
+                if repo_url not in seen_urls and repo_url != url:
+                    seen_urls.add(repo_url)
+                    repos.append({
+                        "url": repo_url,
+                        "stars": repo_stars_num
+                    })
 
         pagination_buttons = parsed_node.css(NEXT_BUTTON_SELECTOR)
 
+        next_page_url = None
         if len(pagination_buttons) == 2:
-            page_url = pagination_buttons[1].attributes["href"]
+            next_page_url = pagination_buttons[1].attributes["href"]
         elif pagination_buttons and pagination_buttons[0].text() == "Next":
-            page_url = pagination_buttons[0].attributes["href"]
-        elif len(pagination_buttons) == 0 or pagination_buttons[0].text() == "Previous":
-            break
+            next_page_url = pagination_buttons[0].attributes["href"]
 
         pbar.update(REPOS_PER_PAGE)
 
-    pbar.close()
+        if next_page_url is None:
+            break
+
+        prefetcher.submit(next_page_url)
+        page_url = next_page_url
+
+    prefetcher.shutdown()
+    if pbar is not None:
+        pbar.close()
 
     if report:
         try:
@@ -235,6 +242,9 @@ def cli(url, repositories, search, table, rows, minstar, report, description, to
             click.echo(e)
 
     sorted_repos = sort_repos(repos, rows)
+
+    if description:
+        sorted_repos = enrich_descriptions(sess, sorted_repos, token)
 
     if search:
         for repo in repos:

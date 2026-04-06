@@ -25,6 +25,7 @@ tqdm = "^4.66.4"
 [tool.poetry.dev-dependencies]
 better_exceptions = "^0.2.2"
 pysnooper = "^0.3.0"
+pytest = "^7.0"
 
 [tool.poetry.scripts]
 ghtopdep = 'ghtopdep.ghtopdep:cli'
