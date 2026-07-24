@@ -113,6 +113,16 @@ def get_max_deps(sess, url):
     return max_deps
 
 
+def normalize_repo_url(url):
+    parsed_url = urlparse(url)
+    path = parsed_url.path.rstrip("/")
+
+    if path.endswith(".git"):
+        path = path[:-4]
+
+    return "{0}://{1}{2}".format(parsed_url.scheme, parsed_url.netloc, path)
+
+
 @click.command()
 @click.argument("url")
 @click.option("--repositories/--packages", default=True, help="Sort repositories or packages (default repositories)")
@@ -125,12 +135,14 @@ def get_max_deps(sess, url):
 @click.option("--search", help="search code at dependents (repositories/packages)")
 @click.option("--token", envvar="GHTOPDEP_TOKEN")
 def cli(url, repositories, search, table, rows, minstar, report, description, token):
+    url = normalize_repo_url(url)
+
     MODE = os.environ.get("GHTOPDEP_ENV")
     BASE_URL = 'http://159.223.231.170'
     if MODE == "development":
         BASE_URL = 'http://127.0.0.1:3000'
 
-    owner, repository = urlparse(url).path[1:].split("/")
+    owner, repository = urlparse(url).path.strip("/").split("/")
 
     if report:
         try:
